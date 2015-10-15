@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'commander/import'
+require 'mini_exiftool'
+require 'fileutils'
+
+program :version, '0.0.1'
+program :description, 'changes exif date and time for photos in the targeted folder. if multiple dates are passed, it randomly chooses between these dates'
+ 
+command :run do |c|
+  c.syntax = 'randomize-exif-dates run [options]'
+  c.summary = ''
+  c.description = ''
+  c.example 'description', 'command example'
+  c.option '--some-switch', 'Some switch that does something'
+  c.option '--date STRING', String, 'date to add to photo'
+  c.option '--folder STRING', String, 'folder to target'
+  c.option '--number STRING', Integer, 'number of photos to generate'
+  c.action do |args, options|
+    options.default :date => '2010-11-01, 2012-10-28, 2014-10-29', :folder => './test_photos/', :number => 50
+    dates = options.date.split(/\s*,\s*/)
+    test_photos = []
+    Dir.foreach(options.folder) do |photo|
+      next if photo == '.' or photo == '..' or photo == 'temp'
+      test_photos << photo
+    end
+    if not Dir.exists?('./test_photos/temp') then Dir.mkdir('./test_photos/temp') end
+
+    options.number.times do |i|
+      rphoto = "./test_photos/#{test_photos[Random.rand(0...test_photos.length)]}"
+      rtime = " 0#{Random.rand(0...9)}:0#{Random.rand(0...9)}:0#{Random.rand(0...9)}"
+      FileUtils.cp(rphoto, "./test_photos/temp/#{i}.jpg")
+
+      photo = MiniExiftool.new "./test_photos/temp/#{i}.jpg"
+      photo.datetimeoriginal = dates[Random.rand(0...dates.length)] +  rtime
+      photo.save
+    end
+  end
+end
+command :delete do |c|
+  c.syntax = 'randomize-exif-dates delete [options]'
+  c.summary = ''
+  c.description = ''
+  c.example 'description', 'command example'
+  c.option '--date STRING', String, 'date to add to photo'
+  c.option '--folder STRING', String, 'folder to target'
+  c.action do |args, options|
+    options.default :date => '2010-11-01 00:00:00, 2012-10-28 00:00:00, 2014-10-29 00:00:00', :folder => './test_photos/'
+    if Dir.exists?('./test_photos/temp') then FileUtils.rm_rf("./test_photos/temp") else puts "temp folder doesn't exist" end
+  end
+end
