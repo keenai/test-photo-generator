@@ -8,8 +8,8 @@ require 'fileutils'
 program :version, '0.0.1'
 program :description, 'changes exif date and time for photos in the targeted folder. if multiple dates are passed, it randomly chooses between these dates'
  
-command :run do |c|
-  c.syntax = 'randomize-exif-dates run [options]'
+command :create do |c|
+  c.syntax = 'test-photo-generator create [options]'
   c.summary = ''
   c.description = ''
   c.example 'description', 'command example'
@@ -18,7 +18,7 @@ command :run do |c|
   c.option '--folder STRING', String, 'folder to target'
   c.option '--number STRING', Integer, 'number of photos to generate'
   c.action do |args, options|
-    options.default :date => '2010-11-01, 2012-10-28, 2014-10-29', :folder => './test_photos/', :number => 50
+    options.default :date => '2010-11-01, 2012-10-28, 2014-10-29', :folder => './test_photos/', :number => 10
     dates = options.date.split(/\s*,\s*/)
     test_photos = []
     Dir.foreach(options.folder) do |photo|
@@ -39,7 +39,7 @@ command :run do |c|
   end
 end
 command :delete do |c|
-  c.syntax = 'randomize-exif-dates delete [options]'
+  c.syntax = 'test-photo-generator delete [options]'
   c.summary = ''
   c.description = ''
   c.example 'description', 'command example'
